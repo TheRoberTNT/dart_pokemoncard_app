@@ -1,7 +1,7 @@
 import 'db.dart';
 import 'menu.dart';
 
-void main() async{
+void main() async {
   try {
     await DB.instalarBBDD();
     final conn = await DB.obtenerConexion();

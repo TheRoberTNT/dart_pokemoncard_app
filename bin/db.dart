@@ -40,10 +40,13 @@ class DB {
     print('Conectado a $_nombreBBDD...');
   }
 
-    static Future<void> _crearTablas(MySqlConnection conn) async {
+  static Future<void> _crearTablas(MySqlConnection conn) async {
     try {
       await _crearTablaUsuario(conn);
       await _crearTablaSobre(conn);
+      await _crearTablaPokemon(conn);
+      await _crearTablaColeccion(conn);
+      await _crearTablaColeccionCartas(conn);
     } catch (e) {
       print('Error al crear tablas: $e');
       rethrow;
@@ -67,7 +70,7 @@ class DB {
     }
   }
 
-    static _crearTablaSobre(connection) async{
+  static _crearTablaSobre(connection) async{
     try {
       await connection!.query('''
         CREATE TABLE IF NOT EXISTS sobre(
@@ -82,6 +85,65 @@ class DB {
       print('Error al inicializar la tabla sobre: $error');
     } finally {
       print ('Tabla Sobre completada');
+    }
+  }
+  static _crearTablaPokemon(connection) async {
+    try {
+      await connection!.query('''
+        CREATE TABLE IF NOT EXISTS pokemon(
+          id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          nombre VARCHAR(30) NOT NULL UNIQUE,
+          tipo VARCHAR(40) NOT NULL,
+          hp INT NOT NULL,
+          def INT NOT NULL,
+          attk INT NOT NULL,
+          speed INT NOT NULL,
+          attk_special INT NOT NULL,
+          def_special INT NOT NULL
+        )
+      ''');
+      print('Cargando Tabla Pokemon...');
+    } catch (error) {
+      print('Error al inicializar la tabla pokemon: $error');
+    } finally {
+      print('Tabla pokemon completada');
+    }
+  }
+
+  static _crearTablaColeccion(connection) async {
+    try {
+      await connection!.query('''
+        CREATE TABLE IF NOT EXISTS coleccion(
+          id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+          id_usuario INT NOT NULL UNIQUE,
+          FOREIGN KEY (id_usuario) REFERENCES usuario(idusuario) ON DELETE CASCADE
+        )
+      ''');
+      print('Cargando Tabla Coleccion...');
+    } catch (error) {
+      print('Error al inicializar la tabla coleccion: $error');
+    } finally {
+      print('Tabla coleccion completada');
+    }
+  }
+
+  static _crearTablaColeccionCartas(connection) async {
+    try {
+      await connection!.query('''
+        CREATE TABLE IF NOT EXISTS coleccion_cartas(
+          id_coleccion INT NOT NULL,
+          id_pokemon INT NOT NULL,
+          cantidad INT NOT NULL DEFAULT 1,
+          PRIMARY KEY (id_coleccion, id_pokemon),
+          FOREIGN KEY (id_coleccion) REFERENCES coleccion(id) ON DELETE CASCADE,
+          FOREIGN KEY (id_pokemon) REFERENCES pokemon(id) ON DELETE CASCADE
+        )
+      ''');
+      print('Cargando Tabla Coleccion Cartas...');
+    } catch (error) {
+      print('Error al inicializar la tabla coleccion_cartas: $error');
+    } finally {
+      print('Tabla coleccion_cartas completada');
     }
   }
 }
