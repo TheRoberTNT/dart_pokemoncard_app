@@ -1,4 +1,5 @@
 import 'package:mysql1/mysql1.dart';
+import 'pokemon.dart';
 
 class DB {
   static const String _host = 'localhost';
@@ -131,10 +132,10 @@ class DB {
     try {
       await connection!.query('''
         CREATE TABLE IF NOT EXISTS coleccion_cartas(
+          id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           id_coleccion INT NOT NULL,
           id_pokemon INT NOT NULL,
           cantidad INT NOT NULL DEFAULT 1,
-          PRIMARY KEY (id_coleccion, id_pokemon),
           FOREIGN KEY (id_coleccion) REFERENCES coleccion(id) ON DELETE CASCADE,
           FOREIGN KEY (id_pokemon) REFERENCES pokemon(id) ON DELETE CASCADE
         )
@@ -144,6 +145,26 @@ class DB {
       print('Error al inicializar la tabla coleccion_cartas: $error');
     } finally {
       print('Tabla coleccion_cartas completada');
+    }
+  }
+
+  Future<void> guardarPokemonEnColeccion(Pokemon pokemon, String usuario) async {
+    var conn = await DB.obtenerConexion();
+    try {
+      await conn.query('''
+        INSERT INTO coleccion_cartas (id_coleccion, id_pokemon, cantidad)
+        VALUES (
+          (SELECT id FROM coleccion WHERE id_usuario = (SELECT idusuario FROM usuario WHERE nombre = ?)),
+          (SELECT id FROM pokemon WHERE nombre = ?),
+          1
+        )
+        ON DUPLICATE KEY UPDATE cantidad = cantidad + 1
+      ''', [usuario, pokemon.nombre]);
+    } catch (e) {
+      print("Error al guardar el Pokémon en la colección: $e");
+      rethrow;
+    } finally {
+      await conn.close();
     }
   }
 }
