@@ -88,7 +88,7 @@ class Menu{
   }
 
   void menu() {
-    stdout.writeln('''Bienvenido ${usuario.user}
+    stdout.writeln('''Bienvenid@ ${usuario.user}
     Elije una opción:
     1 - Abrir sobre
     2 - Mirar tu colección
@@ -129,46 +129,46 @@ class Menu{
     menu();
   }
 
-void verColeccion() async {
-  stdout.writeln("\n=== TU COLECCIÓN DE POKÉMON ===");
-  try {
-    var resultados = await _connection.query('''
-      SELECT p.nombre, p.tipo, p.hp, p.def, p.attk, p.speed, p.attk_special, p.def_special, cc.cantidad
-      FROM coleccion_cartas cc
-      JOIN pokemon p ON cc.id_pokemon = p.id
-      JOIN coleccion c ON cc.id_coleccion = c.id
-      JOIN usuario u ON c.id_usuario = u.idusuario
-      WHERE u.nombre = ?
-      ORDER BY p.nombre
-    ''', [usuario.user]);
+  void verColeccion() async {
+    stdout.writeln("\n=== TU COLECCIÓN DE POKÉMON ===");
+    try {
+      var resultados = await _connection.query('''
+        SELECT p.nombre, p.tipo, p.hp, p.def, p.attk, p.speed, p.attk_special, p.def_special, cc.cantidad
+        FROM coleccion_cartas cc
+        JOIN pokemon p ON cc.id_pokemon = p.id
+        JOIN coleccion c ON cc.id_coleccion = c.id
+        JOIN usuario u ON c.id_usuario = u.idusuario
+        WHERE u.nombre = ?
+        ORDER BY p.nombre
+      ''', [usuario.user]);
 
-    if (resultados.isEmpty) {
-      stdout.writeln("\nNo tienes Pokémon en tu colección aún.");
-      stdout.writeln("¡Abre algunos sobres para empezar!\n");
-    } else {
-      stdout.writeln("\nTienes ${resultados.length} tipos diferentes de Pokémon:");
-      stdout.writeln("--------------------------------------------------");
-      
-      for (var fila in resultados) {
-        stdout.writeln("Nombre: ${fila['nombre']}");
-        stdout.writeln("Tipos: ${fila['tipo']}");
-        stdout.writeln("Cantidad: ${fila['cantidad']}");
-        stdout.writeln("Estadísticas:");
-        stdout.writeln("  - HP: ${fila['hp']}");
-        stdout.writeln("  - Ataque: ${fila['attk']}");
-        stdout.writeln("  - Defensa: ${fila['def']}");
-        stdout.writeln("  - Velocidad: ${fila['speed']}");
-        stdout.writeln("  - Ataque Especial: ${fila['attk_special']}");
-        stdout.writeln("  - Defensa Especial: ${fila['def_special']}");
+      if (resultados.isEmpty) {
+        stdout.writeln("\nNo tienes Pokémon en tu colección aún.");
+        stdout.writeln("¡Abre algunos sobres para empezar!\n");
+      } else {
+        stdout.writeln("\nTienes ${resultados.length} tipos diferentes de Pokémon:");
         stdout.writeln("--------------------------------------------------");
-      }
       
-      int totalCartas = resultados.fold(0, (sum, fila) => sum + fila['cantidad'] as int);
-      stdout.writeln("\nTotal de cartas en tu colección: $totalCartas\n");
+        for (var fila in resultados) {
+          stdout.writeln("Nombre: ${fila['nombre']}");
+          stdout.writeln("Tipos: ${fila['tipo']}");
+          stdout.writeln("Cantidad: ${fila['cantidad']}");
+          stdout.writeln("Estadísticas:");
+          stdout.writeln("  - HP: ${fila['hp']}");
+          stdout.writeln("  - Ataque: ${fila['attk']}");
+          stdout.writeln("  - Defensa: ${fila['def']}");
+          stdout.writeln("  - Velocidad: ${fila['speed']}");
+          stdout.writeln("  - Ataque Especial: ${fila['attk_special']}");
+          stdout.writeln("  - Defensa Especial: ${fila['def_special']}");
+          stdout.writeln("--------------------------------------------------");
+        }
+      
+        int totalCartas = resultados.fold(0, (sum, fila) => sum + fila['cantidad'] as int);
+        stdout.writeln("\nTotal de cartas en tu colección: $totalCartas\n");
+      }
+    } catch (e) {
+      stdout.writeln("\nError al mostrar la colección: $e\n");
     }
-  } catch (e) {
-    stdout.writeln("\nError al mostrar la colección: $e\n");
+    menu();
   }
-  menu();
-}
 }
